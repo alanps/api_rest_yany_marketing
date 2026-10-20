@@ -1,58 +1,179 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# API REST Yany Marketing
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+API REST para cadastro e autenticação de usuários, construída com Laravel 13 e Laravel Sanctum. Os endpoints de API ficam em `routes/api.php` e recebem o prefixo `/api` automaticamente.
 
-## About Laravel
+## Requisitos
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+O ambiente DDEV deste projeto usa:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- PHP 8.4 (o projeto requer PHP 8.3 ou superior);
+- MariaDB 11.8;
+- Node.js 24 para compilar os assets do frontend;
+- Docker Desktop e DDEV instalados.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Instalação
 
-## Learning Laravel
+Na primeira instalação, copie o arquivo de ambiente de exemplo. No PowerShell:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```powershell
+Copy-Item .env.example .env
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Configure o `.env` para usar o banco fornecido pelo DDEV:
 
-## Contributing
+```dotenv
+APP_URL=https://api-rest-yany-marketing.ddev.site
+DB_CONNECTION=mariadb
+DB_HOST=db
+DB_PORT=3306
+DB_DATABASE=db
+DB_USERNAME=db
+DB_PASSWORD=db
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Inicie o ambiente e instale as dependências:
 
-## Code of Conduct
+```bash
+ddev start
+ddev composer install
+ddev npm install
+ddev exec php artisan key:generate
+ddev exec php artisan migrate
+ddev npm run build
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+O comando de migração cria as tabelas da aplicação e a tabela `personal_access_tokens` usada pelo Sanctum. O `.env` contém configurações locais e não deve ser enviado ao repositório.
 
-## Security Vulnerabilities
+## Execução
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+O DDEV serve a aplicação em:
 
-## License
+```text
+https://api-rest-yany-marketing.ddev.site
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Para inspecionar as rotas da API:
+
+```bash
+ddev exec php artisan route:list --path=api
+```
+
+Para executar os testes:
+
+```bash
+ddev exec php artisan test --compact
+```
+
+## Autenticação
+
+O cadastro e o login retornam um token pessoal do Sanctum. Envie-o nas rotas protegidas pelo cabeçalho `Authorization: Bearer <token>`. Inclua também `Accept: application/json` e, ao enviar JSON, `Content-Type: application/json`.
+
+Guarde o token com segurança. Ele é retornado ao criar a sessão; depois do logout, o token revogado deixa de autenticar requisições.
+
+Nos exemplos abaixo, substitua `https://api-rest-yany-marketing.ddev.site` pela URL do seu ambiente, se necessário.
+
+## Rotas
+
+| Método | Rota | Autenticação | Descrição |
+| --- | --- | --- | --- |
+| `POST` | `/api/register` | Não | Cria um usuário e retorna um token |
+| `POST` | `/api/login` | Não | Valida as credenciais e retorna um token |
+| `GET` | `/api/me` | Bearer token | Retorna o usuário autenticado |
+| `POST` | `/api/logout` | Bearer token | Revoga o token usado na requisição |
+| `POST` | `/api/logout-all` | Bearer token | Revoga todos os tokens do usuário |
+
+### Cadastro — `POST /api/register`
+
+Campos obrigatórios: `name`, `email`, `password` e `password_confirmation`. A senha precisa ter pelo menos 8 caracteres e corresponder à confirmação.
+
+```bash
+curl -X POST https://api-rest-yany-marketing.ddev.site/api/register \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Ana Silva",
+    "email": "ana@example.com",
+    "password": "senha-segura-123",
+    "password_confirmation": "senha-segura-123"
+  }'
+```
+
+Resposta `201 Created`:
+
+```json
+{
+  "user": {
+    "name": "Ana Silva",
+    "email": "ana@example.com",
+    "updated_at": "2026-10-20T12:00:00.000000Z",
+    "created_at": "2026-10-20T12:00:00.000000Z",
+    "id": 1
+  },
+  "token": "1|token-de-exemplo"
+}
+```
+
+O campo `password` não é incluído na resposta. E-mail duplicado ou outros erros de validação retornam `422 Unprocessable Entity`.
+
+### Login — `POST /api/login`
+
+```bash
+curl -X POST https://api-rest-yany-marketing.ddev.site/api/login \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "ana@example.com",
+    "password": "senha-segura-123"
+  }'
+```
+
+Resposta `200 OK` contém `user` e `token`. Credenciais incorretas retornam `401 Unauthorized`; campos ausentes ou inválidos retornam `422`. O endpoint permite até cinco tentativas por minuto para a combinação de e-mail e endereço IP; tentativas excedentes recebem `429 Too Many Requests`.
+
+### Consultar usuário autenticado — `GET /api/me`
+
+```bash
+curl https://api-rest-yany-marketing.ddev.site/api/me \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer SEU_TOKEN"
+```
+
+Retorna os dados do usuário autenticado. Sem token ou com token inválido, retorna `401 Unauthorized`.
+
+### Logout — `POST /api/logout`
+
+Revoga somente o token enviado na requisição:
+
+```bash
+curl -X POST https://api-rest-yany-marketing.ddev.site/api/logout \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer SEU_TOKEN"
+```
+
+Retorna `200 OK` com uma mensagem de confirmação. O token revogado não poderá ser usado novamente.
+
+### Logout de todos os dispositivos — `POST /api/logout-all`
+
+Revoga todos os tokens do usuário autenticado, inclusive o token usado nesta chamada:
+
+```bash
+curl -X POST https://api-rest-yany-marketing.ddev.site/api/logout-all \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer SEU_TOKEN"
+```
+
+Após essa chamada, será necessário fazer login novamente para obter outro token.
+
+## Formato dos erros
+
+Erros de validação retornam `422` com a mensagem e os detalhes por campo, por exemplo:
+
+```json
+{
+  "message": "The email field is required.",
+  "errors": {
+    "email": ["The email field is required."]
+  }
+}
+```
+
+Credenciais inválidas e acesso sem autenticação retornam `401`. Envie `Accept: application/json` para receber respostas no formato JSON.
