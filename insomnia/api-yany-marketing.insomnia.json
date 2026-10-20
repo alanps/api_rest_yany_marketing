@@ -1,0 +1,259 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-10-20T00:00:00.000Z",
+  "__export_source": "insomnia.desktop.app",
+  "resources": [
+    {
+      "_id": "__WORKSPACE_ID__",
+      "parentId": null,
+      "modified": 1792454400000,
+      "created": 1792454400000,
+      "name": "API REST Yany Marketing",
+      "description": "Coleção para testar cadastro, login, consulta e revogação de tokens Sanctum.",
+      "scope": "collection",
+      "_type": "workspace"
+    },
+    {
+      "_id": "__BASE_ENVIRONMENT_ID__",
+      "parentId": "__WORKSPACE_ID__",
+      "modified": 1792454400000,
+      "created": 1792454400000,
+      "name": "Base Environment",
+      "data": {
+        "base_url": "https://api-rest-yany-marketing.ddev.site",
+        "name": "Usuário de teste",
+        "email": "ana.insomnia@example.com",
+        "password": "senha-segura-123",
+        "token": ""
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "base_url",
+          "name",
+          "email",
+          "password",
+          "token"
+        ]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1792454400000,
+      "_type": "environment"
+    },
+    {
+      "_id": "fld_auth",
+      "parentId": "__WORKSPACE_ID__",
+      "modified": 1792454400000,
+      "created": 1792454400000,
+      "name": "Autenticação",
+      "description": "Cadastro, login e acesso protegido.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1792454400000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_tokens",
+      "parentId": "__WORKSPACE_ID__",
+      "modified": 1792454400001,
+      "created": 1792454400001,
+      "name": "Tokens e logout",
+      "description": "Revogue o token atual ou todos os tokens do usuário.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1792454300000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_register",
+      "parentId": "fld_auth",
+      "modified": 1792454400002,
+      "created": 1792454400002,
+      "url": "{{ _.base_url }}/api/register",
+      "name": "Cadastrar usuário",
+      "description": "Retorna 201 e um token Sanctum. Troque o e-mail no environment se ele já estiver cadastrado.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"{{ _.name }}\",\n  \"email\": \"{{ _.email }}\",\n  \"password\": \"{{ _.password }}\",\n  \"password_confirmation\": \"{{ _.password }}\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "authentication": {},
+      "metaSortKey": -1792454200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_login",
+      "parentId": "fld_auth",
+      "modified": 1792454400003,
+      "created": 1792454400003,
+      "url": "{{ _.base_url }}/api/login",
+      "name": "Login válido",
+      "description": "Retorna 200, o usuário e um token. Copie o valor de token para o environment antes de chamar rotas privadas.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"{{ _.email }}\",\n  \"password\": \"{{ _.password }}\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "authentication": {},
+      "metaSortKey": -1792454100000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_login_invalid",
+      "parentId": "fld_auth",
+      "modified": 1792454400004,
+      "created": 1792454400004,
+      "url": "{{ _.base_url }}/api/login",
+      "name": "Login com senha incorreta",
+      "description": "Use uma conta existente. A resposta esperada é 401 Unauthorized.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"{{ _.email }}\",\n  \"password\": \"senha-incorreta\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "authentication": {},
+      "metaSortKey": -1792454000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_me",
+      "parentId": "fld_auth",
+      "modified": 1792454400005,
+      "created": 1792454400005,
+      "url": "{{ _.base_url }}/api/me",
+      "name": "Usuário autenticado",
+      "description": "Use um token válido no environment. A resposta esperada é 200 OK.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.token }}" }
+      ],
+      "authentication": {},
+      "metaSortKey": -1792453900000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_me_unauthenticated",
+      "parentId": "fld_auth",
+      "modified": 1792454400006,
+      "created": 1792454400006,
+      "url": "{{ _.base_url }}/api/me",
+      "name": "Usuário sem token (401)",
+      "description": "Não envia token. A resposta esperada é 401 Unauthorized.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json" }
+      ],
+      "authentication": {},
+      "metaSortKey": -1792453800000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_logout",
+      "parentId": "fld_tokens",
+      "modified": 1792454400007,
+      "created": 1792454400007,
+      "url": "{{ _.base_url }}/api/logout",
+      "name": "Logout — revogar token atual",
+      "description": "Revoga o token enviado. A resposta esperada é 200 OK.",
+      "method": "POST",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.token }}" }
+      ],
+      "authentication": {},
+      "metaSortKey": -1792453700000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_logout_all",
+      "parentId": "fld_tokens",
+      "modified": 1792454400008,
+      "created": 1792454400008,
+      "url": "{{ _.base_url }}/api/logout-all",
+      "name": "Logout — revogar todos os tokens",
+      "description": "Revoga todos os tokens do usuário, incluindo este. A resposta esperada é 200 OK.",
+      "method": "POST",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.token }}" }
+      ],
+      "authentication": {},
+      "metaSortKey": -1792453600000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    }
+  ]
+}
